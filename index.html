@@ -46,6 +46,7 @@
 
             // Process the raw data
             const lines = rawData.trim().split('\n');
+            lines.shift(); // Remove the header line
             const dataMap = {};
             const versions = new Set();
 
