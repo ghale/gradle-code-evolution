@@ -6,6 +6,8 @@ if [ ! -d gradle ]; then
     git clone -q https://github.com/gradle/gradle.git
 else
     git -C gradle fetch --all -q
+    git -C gradle reset --hard -q
+    git -C gradle clean -qfdx
 fi
 
 git="git -C gradle"
@@ -28,26 +30,55 @@ versions="$base_tag $versions release master"
 #versions="master"
 
 get_child_directories() {
-  local root_dir=$1
-  local depth=$2
+    local root_dir=$1
+    local depth=$2
 
-  if [ -d "$root_dir" ]; then
-    find "$root_dir" -mindepth "$depth" -maxdepth "$depth" -type d
-  else
-    echo ""
-  fi
+    if [ -d "$root_dir" ]; then
+        find "$root_dir" -mindepth "$depth" -maxdepth "$depth" -type d
+    else
+        echo ""
+    fi
+}
+
+is_in_tags() {
+    local tag=$1
+    local tags_list=$2
+
+    for t in $tags_list; do
+        if [[ "$t" == "$tag" ]]; then
+            return 0
+        fi
+    done
+    return 1
 }
 
 process_version() {
     tag=$1
-    version=${tag#v}
-    echo "Processing: $version"
+    versions=$2
 
-    commit_count=$($git rev-list --count $tag)
-    printf "Commits\t%s\t%d\n" $version $commit_count >> $output_file
+    # commit_count=$($git rev-list --count $tag)
+    # printf "Commits\t%s\t%d\n" $version $commit_count >> $output_file
 
     $git checkout -q $tag
     $git clean -qfdx
+
+    if [[ "$tag" == v* ]]; then
+        version=${tag#v}
+    else
+        gradle_version=$(cat gradle/version.txt)
+        if [[ "$gradle_version" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            if is_in_tags "v$gradle_version.0" "$versions"; then
+                echo "Skipping tag '$tag' with version '$gradle_version' as it has already been processed"
+                return
+            fi
+            version="$gradle_version.0 ($tag)"
+        else
+            echo "Skipping tag '$tag' with version '$gradle_version' as it points to a patch release"
+            return
+        fi
+    fi
+
+    echo "Processing: $version"
 
     # Find all subprojects
 
@@ -63,12 +94,12 @@ process_version() {
             continue
         fi
         total_lines=$(find "$subproject_dir/src/main" -type f -print0 | xargs -0 cat | wc -l)
-        printf "%s\t%s\t%d\n" "$subproject" "$version" "$total_lines" >> $output_file
+        printf "%s\t%s\t%d\n" "$subproject" "$version" "$total_lines" >>$output_file
     done
 }
 
-printf "Subproject\tVersion\tLOC\n" > $output_file
+printf "Subproject\tVersion\tLOC\n" >$output_file
 
 for version in $versions; do
-    process_version $version
+    process_version $version $versions
 done
