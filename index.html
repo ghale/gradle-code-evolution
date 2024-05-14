@@ -10,17 +10,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-corner/dist/fork-corner.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fork-corner/dist/fork-corner.min.js" defer></script>
     <style>
-        html, body {
+        html,
+        body {
             height: 100%;
             margin: 0;
         }
+
         body {
             display: flex;
             flex-direction: column;
         }
+
         #header {
             margin: 0.5em;
         }
+
         #chart-container {
             flex: 1;
             display: flex;
@@ -28,6 +32,7 @@
             align-items: center;
             margin: 0.5em;
         }
+
         canvas {
             width: 100% !important;
             height: 100% !important;
@@ -66,12 +71,54 @@
             // Sort modules by the sum of lines
             moduleSums.sort((a, b) => b.sum - a.sum);
 
-            const datasets = moduleSums.map(item => {
+            const colors = [
+                '141, 211, 199', // Pastel Teal
+                '255, 255, 179', // Pastel Yellow
+                '190, 186, 218', // Pastel Lavender
+                '251, 128, 114', // Pastel Red
+                '128, 177, 211', // Pastel Blue
+                '253, 180, 98',  // Pastel Orange
+                '179, 222, 105', // Pastel Green
+                '252, 205, 229', // Pastel Pink
+                '217, 217, 217', // Light Gray
+                '188, 128, 189', // Pastel Purple
+                '204, 235, 197', // Pastel Mint
+                '255, 237, 111', // Light Pastel Yellow
+                '174, 199, 232', // Light Blue
+                '255, 187, 120', // Light Orange
+                '152, 223, 138', // Light Green
+                '255, 152, 150', // Light Coral
+                '214, 39, 40',   // Muted Red
+                '31, 119, 180',  // Muted Blue
+                '255, 127, 14',  // Muted Orange
+                '44, 160, 44',   // Muted Green
+                '148, 103, 189', // Muted Purple
+                '140, 86, 75',   // Muted Brown
+                '227, 119, 194', // Muted Pink
+                '127, 127, 127', // Medium Gray
+                '188, 189, 34',  // Muted Yellow
+                '23, 190, 207',  // Muted Cyan
+                '174, 199, 232', // Light Sky Blue
+                '255, 187, 120', // Light Apricot
+                '152, 223, 138', // Light Pastel Green
+                '255, 152, 150', // Light Salmon
+                '197, 176, 213', // Light Lilac
+                '196, 156, 148'  // Light Beige
+            ];
+
+            const datasets = moduleSums.map((item, index) => {
+                const color = colors[index % colors.length];
+                const backgroundColor = `rgba(${color}, 0.5)`;
+                const borderColor = `rgba(${color}, 1)`;
+
                 return {
                     label: item.module,
                     data: sortedVersions.map(version => dataMap[item.module][version] || 0),
                     fill: true,
-                    pointRadius: 3,
+                    backgroundColor,
+                    borderColor,
+                    borderWidth: 1,
+                    pointRadius: 2,
                     pointHoverRadius: 10,
                 };
             });
@@ -91,16 +138,18 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: {
-                            title: {
-                                display: true,
-                                text: 'Version'
+                            ticks: {
+                                font: {
+                                    size: 18
+                                }
                             }
                         },
                         y: {
                             stacked: true,
-                            title: {
-                                display: true,
-                                text: 'Numer of lines'
+                            ticks: {
+                                font: {
+                                    size: 18
+                                }
                             }
                         }
                     },
@@ -152,7 +201,8 @@
     <div id="chart-container">
         <canvas id="moduleChart"></canvas>
     </div>
-    <a href="https://github.com/lptr/gradle-code-evolution" target="_blank" id="fork-corner" class="fork-corner fc-pos-tr fc-animate fc-theme-github fc-size-small"></a>
+    <a href="https://github.com/lptr/gradle-code-evolution" target="_blank" id="fork-corner"
+        class="fork-corner fc-pos-tr fc-animate fc-theme-github fc-size-small"></a>
 </body>
 
 </html>
