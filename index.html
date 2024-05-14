@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Module Sizes Over Time</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        #header {
+            margin: 0.5em;
+        }
+        #chart-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0.5em;
+        }
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+    <script>
+        // Function to fetch and process the TSV file
+        async function fetchData() {
+            const response = await fetch('report.tsv');
+            const rawData = await response.text();
+
+            // Process the raw data
+            const lines = rawData.trim().split('\n');
+            const dataMap = {};
+            const versions = new Set();
+
+            lines.forEach(line => {
+                const [module, version, size] = line.split('\t');
+                if (!dataMap[module]) {
+                    dataMap[module] = {};
+                }
+                dataMap[module][version] = parseInt(size, 10);
+                versions.add(version);
+            });
+
+            const sortedVersions = Array.from(versions).sort();
+
+            // Prepare datasets for Chart.js
+            const moduleSums = Object.keys(dataMap).map(module => {
+                return {
+                    module: module,
+                    sum: Object.values(dataMap[module]).reduce((a, b) => a + b, 0)
+                };
+            });
+
+            // Sort modules by the sum of lines
+            moduleSums.sort((a, b) => b.sum - a.sum);
+
+            const datasets = moduleSums.map(item => {
+                return {
+                    label: item.module,
+                    data: sortedVersions.map(version => dataMap[item.module][version] || 0),
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 10,
+                };
+            });
+
+            // Register the zoom plugin
+            Chart.register(ChartZoom);
+
+            // Configure and render the chart
+            const ctx = document.getElementById('moduleChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedVersions,
+                    datasets: datasets
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Version'
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Numer of lines'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'nearest',
+                            intersect: false,
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.dataset.label || '';
+                                    const value = new Intl.NumberFormat().format(context.raw);
+                                    return `${label}: ${value} lines`;
+                                }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    speed: 0.05,
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'xy',
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                            },
+                        },
+                    },
+                    response: true,
+                }
+            });
+        }
+
+        // Call the fetchData function to load and visualize the data
+        fetchData();
+    </script>
+</head>
+
+<body>
+    <h1 id="header">Gradle code structure evolution over time</h1>
+    <div id="chart-container">
+        <canvas id="moduleChart"></canvas>
+    </div>
+</body>
+
+</html>
