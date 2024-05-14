@@ -52,6 +52,14 @@ is_in_tags() {
     return 1
 }
 
+count_lines_of_code() {
+  local directory=$1
+
+  # Run cloc and extract the total lines of code from its output
+  total_lines=$(cloc --json "$directory" | jq '.SUM.code')
+  echo "$total_lines"
+}
+
 process_version() {
     tag=$1
     versions=$2
@@ -93,7 +101,7 @@ process_version() {
         if [ ! -d "$subproject_dir/src/main" ]; then
             continue
         fi
-        total_lines=$(find "$subproject_dir/src/main" -type f -print0 | xargs -0 cat | wc -l)
+        total_lines=$(count_lines_of_code "$subproject_dir/src/main")
         printf "%s\t%s\t%d\n" "$subproject" "$version" "$total_lines" >>$output_file
     done
 }
