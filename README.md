@@ -2,6 +2,6 @@
 
 A tool to generate nice graphs of Gradle's source code structure, like so:
 
-![image](https://gist.github.com/assets/495366/3e649ab9-e6f5-4d4f-b966-e2ad1b0cdf65)
+<img width="1244" alt="image" src="https://github.com/lptr/gradle-code-evolution/assets/495366/28f5e81b-f727-431b-964e-778ae3f69169">
 
 Data: https://docs.google.com/spreadsheets/d/1rrB1lKf8Eie_wQyte-Mwgo3bxNxC1Ium4OmyjWx502o/
