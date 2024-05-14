@@ -43,7 +43,8 @@ jobs:
         run: |
           ./produce-report.sh
           mkdir -p dist
-          cp index.html report.tsv dist/
+          cp report.tsv dist/
+          awk -v date="$(date)" '{gsub(/\{\{CURRENT_DATE\}\}/, date)}1' index.html > dist/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
