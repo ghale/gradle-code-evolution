@@ -48,7 +48,7 @@
             const lines = rawData.trim().split('\n');
             lines.shift(); // Remove the header line
             const dataMap = {};
-            const versions = new Set();
+            const versionSet = new Set();
 
             lines.forEach(line => {
                 const [module, version, size] = line.split('\t');
@@ -56,10 +56,10 @@
                     dataMap[module] = {};
                 }
                 dataMap[module][version] = parseInt(size, 10);
-                versions.add(version);
+                versionSet.add(version);
             });
 
-            const sortedVersions = Array.from(versions).sort();
+            const versions = Array.from(versionSet);
 
             // Prepare datasets for Chart.js
             const moduleSums = Object.keys(dataMap).map(module => {
@@ -109,18 +109,20 @@
 
             const datasets = moduleSums.map((item, index) => {
                 const color = colors[index % colors.length];
-                const backgroundColor = `rgba(${color}, 0.5)`;
+                const backgroundColor = `rgba(${color}, 1)`;
                 const borderColor = `rgba(${color}, 1)`;
 
                 return {
                     label: item.module,
-                    data: sortedVersions.map(version => dataMap[item.module][version] || 0),
+                    data: versions.map(version => dataMap[item.module][version] || 0),
                     fill: true,
                     backgroundColor,
                     borderColor,
-                    borderWidth: 1,
-                    pointRadius: 2,
+                    borderWidth: 0,
+                    pointRadius: 0,
                     pointHoverRadius: 10,
+                    cubicInterpolationMode: "monotone",
+                    stepped: false
                 };
             });
 
@@ -132,7 +134,7 @@
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: sortedVersions,
+                    labels: versions,
                     datasets: datasets
                 },
                 options: {
