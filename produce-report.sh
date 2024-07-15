@@ -116,13 +116,13 @@ process_version() {
     platform_dirs=($(get_child_directories gradle/platforms 2))
     testing_dirs=($(get_child_directories gradle/testing 1))
 
-    all_subproject_dirs=(. ${old_subprojects_dirs[@]} ${platform_dirs[@]} ${testing_dirs[@]})
+    all_subproject_dirs=(gradle ${old_subprojects_dirs[@]} ${platform_dirs[@]} ${testing_dirs[@]})
 
     build_logic_dirs=($(get_child_directories gradle/build-logic 1))
     build_logic_commons_dirs=($(get_child_directories gradle/build-logic-commons 1))
     build_logic_settings_dirs=($(get_child_directories gradle/build-logic-settings 1))
 
-    all_build_logic_dirs=(buildSrc ${build_logic_dirs[@]} ${build_logic_commons_dirs[@]} ${build_logic_settings_dirs[@]})
+    all_build_logic_dirs=(gradle/buildSrc ${build_logic_dirs[@]} ${build_logic_commons_dirs[@]} ${build_logic_settings_dirs[@]})
 
     all_dirs=(${all_subproject_dirs[@]} ${all_build_logic_dirs[@]})
 
