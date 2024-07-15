@@ -118,11 +118,12 @@ process_version() {
 
     all_subproject_dirs=(gradle ${old_subprojects_dirs[@]} ${platform_dirs[@]} ${testing_dirs[@]})
 
+    buildSrc_subproject_dirs=($(get_child_directories gradle/buildSrc 1))
     build_logic_dirs=($(get_child_directories gradle/build-logic 1))
     build_logic_commons_dirs=($(get_child_directories gradle/build-logic-commons 1))
     build_logic_settings_dirs=($(get_child_directories gradle/build-logic-settings 1))
 
-    all_build_logic_dirs=(gradle/buildSrc ${build_logic_dirs[@]} ${build_logic_commons_dirs[@]} ${build_logic_settings_dirs[@]})
+    all_build_logic_dirs=(gradle/buildSrc ${buildSrc_subproject_dirs[@]} ${build_logic_dirs[@]} ${build_logic_commons_dirs[@]} ${build_logic_settings_dirs[@]})
 
     all_dirs=(${all_subproject_dirs[@]} ${all_build_logic_dirs[@]})
 
@@ -148,7 +149,7 @@ process_version() {
 
     total_build_script_lines=0
     for dir in $all_dirs; do
-        build_files=($dir/build.gradle* $dir/settings.gradle*)
+        build_files=($dir/*.gradle $dir/*.gradle.kts)
         for build_file in $build_files; do
             if [ -f "$build_file" ]; then
                 lines=$(count_lines_of_code "$build_file")
