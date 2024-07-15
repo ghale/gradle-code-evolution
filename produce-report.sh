@@ -1,4 +1,5 @@
 #!/bin/zsh
+setopt null_glob
 
 output_file="${1:-report.tsv}"
 base_tag="v0.7.0"
@@ -76,10 +77,10 @@ is_in_tags() {
 }
 
 count_lines_of_code() {
-  local directory=$1
+  local target=$1
 
   # Run cloc and extract the total lines of code from its output
-  total_lines=$(cloc --json "$directory" | jq '.SUM.code')
+  total_lines=$(cloc --json "$target" | jq '.SUM.code')
   echo "$total_lines"
 }
 
@@ -123,6 +124,8 @@ process_version() {
 
     all_build_logic_dirs=(buildSrc ${build_logic_dirs[@]} ${build_logic_commons_dirs[@]} ${build_logic_settings_dirs[@]})
 
+    all_dirs=(${all_subproject_dirs[@]} ${all_build_logic_dirs[@]})
+
     echo "Processing: $version with ${#all_subproject_dirs} subprojects and ${#all_build_logic_dirs} build logic dirs"
 
     for subproject_dir in $all_subproject_dirs; do
@@ -142,6 +145,18 @@ process_version() {
         total_lines=$(count_lines_of_code "$build_logic_dir/src/main")
         printf "%s\t%s\t-%d\n" "$subproject" "$version" "$total_lines" >>$output_file
     done
+
+    total_build_script_lines=0
+    for dir in $all_dirs; do
+        build_files=($dir/build.gradle* $dir/settings.gradle*)
+        for build_file in $build_files; do
+            if [ -f "$build_file" ]; then
+                lines=$(count_lines_of_code "$build_file")
+                (( total_build_script_lines += lines ))
+            fi
+        done
+    done
+    printf "Build scripts\t%s\t-%d\n" "$version" "$total_build_script_lines" >>$output_file
 }
 
 printf "Subproject\tVersion\tLOC\n" >$output_file
