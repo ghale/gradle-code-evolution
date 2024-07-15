@@ -115,17 +115,32 @@ process_version() {
     platform_dirs=($(get_child_directories gradle/platforms 2))
     testing_dirs=($(get_child_directories gradle/testing 1))
 
-    subproject_dirs=(. ${old_subprojects_dirs[@]} ${platform_dirs[@]} ${testing_dirs[@]})
+    all_subproject_dirs=(. ${old_subprojects_dirs[@]} ${platform_dirs[@]} ${testing_dirs[@]})
 
-    echo "Processing: $version with ${#subproject_dirs} subprojects"
+    build_logic_dirs=($(get_child_directories gradle/build-logic 1))
+    build_logic_commons_dirs=($(get_child_directories gradle/build-logic-commons 1))
+    build_logic_settings_dirs=($(get_child_directories gradle/build-logic-settings 1))
 
-    for subproject_dir in $subproject_dirs; do
+    all_build_logic_dirs=(buildSrc ${build_logic_dirs[@]} ${build_logic_commons_dirs[@]} ${build_logic_settings_dirs[@]})
+
+    echo "Processing: $version with ${#all_subproject_dirs} subprojects and ${#all_build_logic_dirs} build logic dirs"
+
+    for subproject_dir in $all_subproject_dirs; do
         if [ ! -d "$subproject_dir/src/main" ]; then
             continue
         fi
         subproject=":$(basename $subproject_dir)"
         total_lines=$(count_lines_of_code "$subproject_dir/src/main")
         printf "%s\t%s\t%d\n" "$subproject" "$version" "$total_lines" >>$output_file
+    done
+
+    for build_logic_dir in $all_build_logic_dirs; do
+        if [ ! -d "$build_logic_dir/src/main" ]; then
+            continue
+        fi
+        subproject=":$(basename $build_logic_dir)"
+        total_lines=$(count_lines_of_code "$build_logic_dir/src/main")
+        printf "%s\t%s\t-%d\n" "$subproject" "$version" "$total_lines" >>$output_file
     done
 }
 
