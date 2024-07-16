@@ -118,7 +118,7 @@ process_version() {
 
     all_subproject_dirs=(gradle ${old_subprojects_dirs[@]} ${platform_dirs[@]} ${testing_dirs[@]})
 
-    buildSrc_subproject_dirs=($(get_child_directories gradle/buildSrc 1))
+    buildSrc_subproject_dirs=($(get_child_directories gradle/buildSrc/subprojects 1))
     build_logic_dirs=($(get_child_directories gradle/build-logic 1))
     build_logic_commons_dirs=($(get_child_directories gradle/build-logic-commons 1))
     build_logic_settings_dirs=($(get_child_directories gradle/build-logic-settings 1))
