@@ -128,6 +128,7 @@
 
             // Register the zoom plugin
             Chart.register(ChartZoom);
+            Chart.defaults.scales.linear.min = 0;
 
             // Configure and render the chart
             const ctx = document.getElementById('moduleChart').getContext('2d');
