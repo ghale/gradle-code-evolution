@@ -3,6 +3,7 @@ setopt null_glob
 
 output_file="${1:-report.tsv}"
 base_date="2023-01-01"
+platform=$(uname)
 
 if [ ! -d gradle ]; then
     echo "Cloning repository and checking out master"
@@ -21,7 +22,12 @@ git_cmd() {
 
 getCommitFromOneWeekBefore() {
     commit=$1
-    git_cmd log -1 --merges --since="$base_date" --before="$( date -j -f "%Y-%m-%d" -v-1w "+%Y-%m-%d" $(git_cmd log -1 --format="%cd" --date=short ${commit}))" --format="%H"
+    if [[ "$platform" == "Darwin" ]]; then
+        ONE_WEEK_BEFORE=$(date -j -f "%Y-%m-%d" -v-1w "+%Y-%m-%d" $(git_cmd log -1 --format="%cd" --date=short ${commit}))
+    else
+        ONE_WEEK_BEFORE=$(date -d "$(git_cmd log -1 --format="%cd" --date=short ${commit}) - 1 week" "+%Y-%m-%d")
+    fi
+    git_cmd log -1 --merges --since="$base_date" --before="$ONE_WEEK_BEFORE" --format="%H"
 }
 
 echo "Finding weekly commits going back to $base_date"
