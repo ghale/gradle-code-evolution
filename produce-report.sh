@@ -2,7 +2,7 @@
 setopt null_glob
 
 output_file="${1:-report.tsv}"
-base_date="2023-01-01"
+base_date="2023-06-01"
 platform=$(uname)
 
 if [ ! -d gradle ]; then
