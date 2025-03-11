@@ -1,2 +1,3 @@
 gradle/
 *.tsv
+.idea
