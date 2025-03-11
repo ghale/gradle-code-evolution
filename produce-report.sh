@@ -81,7 +81,10 @@ process_version() {
             continue
         fi
         subproject=":$(basename $subproject_dir)"
-        total_files=$(count_files "$subproject_dir/src/main")
+        total_prod_files=$(count_files "$subproject_dir/src/main")
+        total_test_files=$(count_files "$subproject_dir/src/test")
+        total_integTest_files=$(count_files "$subproject_dir/src/integTest")
+        total_files=$((total_prod_files + total_test_files + total_integTest_files))
         printf "%s\t%s\t%d\n" "$subproject" "$date" "$total_files" >>$output_file
     done
 }
