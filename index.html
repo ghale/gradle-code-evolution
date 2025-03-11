@@ -171,6 +171,9 @@
                                     const value = new Intl.NumberFormat().format(context.raw);
                                     return `${label}: ${value} files`;
                                 }
+                            },
+                            filter: function (tooltip) {
+                                return tooltip.raw > 0;
                             }
                         },
                         zoom: {
